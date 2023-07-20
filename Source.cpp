@@ -1,5 +1,8 @@
 ﻿#include <iostream>
+#include <conio.h>
 //консольная программа которую можете переписывать для встройки в разные системы/механизмы
+//основная задача данного кода - облегчить решение задач по физике, сам код существует онли для моей практике собственно в знании
+//физики и формул а так же для практики написания чистого лаконичного кода на языке С++
 
 //5 модулей под каждый тип задачи
 class N
@@ -69,23 +72,139 @@ public:
 		return Find_kinetic(m, v);
 	}
 };
-
-
-
-
-class F
-{
-	double m = 0, k = 0, l = 0, p = 0, s = 0, P = 0, g = 9.8, V = 0;
-	//F = m*g
-	//F = k*l
-	//F = p * s(p-давление)
-	//Fa = P × g × V, 
-
-};
 class I
 {
+	double U; double R; double I;
+	double Find(double U_here, double R_here)
+	{
+		I = U / R;
+		return I;
+	}
+public:
+	double Start()
+	{
+		std::cout << "Сопротивление  = ";
+		std::cin >> R;
+		std::cout << "Ом" << std::endl;
+		std::cout << "Напряжение  = ";
+		std::cin >> U;
+		std::cout << "Вольт" << std::endl;
+		std::cout << "Сила тока = " << Find(R, U);
+		std::cout << " Ампер" << std::endl;
+		return Find(R, U);
+
+	}
+};
+
+//Ниже вследствие того что будет много формул, во имя облегчения кода я буду создавать новый класс под каждый вид силы и теплоты
+// убрать возможность делать к больше одного и меньше нуля
+class F
+{
+public:
+	virtual double Find(double x, double y) = 0;
+
+
+	virtual double Start() = 0;
+};
+class F_tyag : public F // тут есть некая проблема , т.к передаваться должен только один параметр но я решил это просто добавле-
+{                       //нием 0 вместо отсутсвющего параметра , если кто знает как это решить легче прошу в лс fozu7916(дс)
+	double m;
+	double Find(double x, double y) override
+	{
+		double g = 9.8;
+		double F = g * x;
+		return F;
+	}
+public:
+	double Start() override
+	{
+		std::cout << "Масса = ";
+		std::cin >> m;
+		std::cout << "кг" << std::endl;
+		std::cout << "Сила тяжести = " << Find(m, 0);
+		std::cout << " Ньютонов" << std::endl;
+		return Find(m, 0);
+	}
+
 
 };
+class F_k : public F
+{
+	double k = 0; double l = 0;
+	double Find(double x, double y) override
+	{
+		double F = x * y;
+		return F;
+	}
+public:
+	double Start() override
+	{
+		std::cout << "Коэфицент трения = ";
+		std::cin >> k;
+		std::cout << "Длина = ";
+		std::cin >> l;
+		std::cout << "м" << std::endl;
+		std::cout << "Сила трения = " << Find(k, l);
+		std::cout << " Ньютонов" << std::endl;
+		return Find(k, l);
+	}
+};
+class F_d : public F
+{
+	double p; double s;
+	double Find(double x, double y) override
+	{
+		double F = x * y;
+		return F;
+	}
+public:
+	double Start() override
+	{
+		std::cout << "Давление  = ";
+		std::cin >> p;
+		std::cout << "Паскаль" << std::endl;
+		std::cout << "Площадь = ";
+		std::cin >> s;
+		std::cout << "м^2" << std::endl;
+		std::cout << "Сила = " << Find(p, s);
+		std::cout << " Ньютонов" << std::endl;
+		return Find(p, s);
+	}
+};
+class Fa : public  F
+{
+	double P; double V;
+	double Find(double P_here, double V_here) override
+	{
+		double F = P_here * V_here;
+		return F;
+	}
+public:
+	double Start() override
+	{
+		std::cout << "Плотность жидкости  = ";
+		std::cin >> P;
+		std::cout << "Кг/м^3" << std::endl;
+		std::cout << "Обьём = ";
+		std::cin >> V;
+		std::cout << "м^3" << std::endl;
+		std::cout << "Сила = " << Find(P, V);
+		std::cout << " Ньютонов" << std::endl;
+		return Find(P, V);
+	}
+};
+//класс выполняющий работу
+class Find_force
+{
+public:
+	void Find(F* f)
+	{
+		f->Start();
+
+	}
+};
+
+
 class Q
 {
 
@@ -106,6 +225,7 @@ int main()
 		std::cout << "1-мощность 2-энергия 3-сила 4-ток 5-удельная теплота" << std::endl;
 		std::cin >> variant;
 	}
+
 	while (variant >= 1 && variant <= 5)
 	{
 		//Мощность
@@ -150,26 +270,55 @@ int main()
 		//Сила
 		if (variant == 3)
 		{
-			F f;
+			int x = 0;
+			std::cout << "Выберите тип силы" << "\n" << "1-сила тяжести   2-сила трения 3-сила давления 4-сила Архимеда" << std::endl;
+			std::cin >> x;
+			while (x < 1 or x >4)
+			{
+				std::cout << "Неверный тип силы" << std::endl;
+				std::cout << "Выберите тип силы" << "\n" << "1-сила тяжести   2-сила трения 3-сила давления 4-сила Архимеда" << std::endl;
+				std::cin >> x;
+			}
+
+			while (x >= 1 && x <= 4)
+			{
+				Find_force find;
+				if (x == 1)
+				{
+					F_tyag fe;
+					find.Find(&fe);
+				}
+				if (x == 2)
+				{
+					F_k fe;
+					find.Find(&fe);
+				}
+				if (x == 3)
+				{
+					F_d fe;
+					find.Find(&fe);
+				}
+				if (x == 4)
+				{
+					Fa fe;
+					find.Find(&fe);
+				}
+
+				break;
+			}
+
+			break;
 		}
 
+		if (variant == 4)
+		{
+			I i;
+			i.Start();
+		}
 
-
-
-
-
-
-
-
-
-
-
-
-
-		break;
+		int end;
+		std::cout << "\nНажмите любую клавишу для завершения рабооты";
+		_getch();
+		return 0;
 	}
-	int end;
-	std::cin >> end;
-	return 0;
 }
-
